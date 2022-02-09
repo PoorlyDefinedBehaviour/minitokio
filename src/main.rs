@@ -23,6 +23,7 @@ impl Future for Delay {
       let waker = cx.waker().clone();
       let when = self.when;
 
+      // NOTE: would we use epoll here?
       thread::spawn(move || {
         let now = Instant::now();
 
