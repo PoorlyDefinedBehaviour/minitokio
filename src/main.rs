@@ -4,6 +4,7 @@ use std::{
   future::Future,
   pin::Pin,
   task::{Context, Poll},
+  thread,
   time::{Duration, Instant},
 };
 
@@ -19,7 +20,19 @@ impl Future for Delay {
       println!("hello world");
       Poll::Ready("done")
     } else {
-      cx.waker().wake_by_ref();
+      let waker = cx.waker().clone();
+      let when = self.when;
+
+      thread::spawn(move || {
+        let now = Instant::now();
+
+        if now < when {
+          thread::sleep(when - now);
+        }
+
+        waker.wake();
+      });
+
       Poll::Pending
     }
   }
